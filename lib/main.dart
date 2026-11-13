@@ -3,7 +3,7 @@ import 'package:material_ui/material_ui.dart';
 // Satu-satunya warna yang ditulis langsung: seed color (sesuai spesifikasi #1).
 const Color _warnaDasar = Color.fromARGB(99, 230, 81, 0);
 
-const String _urlGambar = 'https://picsum.photos/800/400';
+const String _pathGambar = 'assets/images/bakery.jpeg';
 
 void main() => runApp(const MenuUmkmApp());
 
@@ -24,12 +24,11 @@ const List<Menu> daftarMenu = [
   Menu(nama: 'Croissant', harga: 22000, kategori: 'Pastry'),
 ];
 
-
 /// Mengubah 25000 menjadi "Rp 25.000".
 String formatRupiah(int angka) {
   final titik = angka.toString().replaceAllMapped(
     RegExp(r'\B(?=(\d{3})+(?!\d))'),
-        (_) => '.',
+    (_) => '.',
   );
   return 'Rp $titik';
 }
@@ -114,10 +113,9 @@ class KepalaUsaha extends StatelessWidget {
           child: SizedBox(
             height: 180,
             width: double.infinity,
-            child: Image.network(
-              _urlGambar,
+            child: Image.asset(
+              _pathGambar,
               fit: BoxFit.cover,
-              // Jika gambar gagal dimuat (offline/URL salah), tampilkan ikon.
               errorBuilder: (context, error, stackTrace) => ColoredBox(
                 color: skema.surfaceContainerHighest,
                 child: Icon(
@@ -134,7 +132,7 @@ class KepalaUsaha extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           'Aneka roti dan pastry hangat dengan resep keluarga. '
-              'Tekstur lembut dengan isian melimpah, harga tetap ramah di kantong mahasiswa.',
+          'Tekstur lembut dengan isian melimpah, harga tetap ramah di kantong mahasiswa.',
           style: teks.bodyMedium?.copyWith(color: skema.onSurfaceVariant),
         ),
       ],
@@ -242,8 +240,55 @@ class KartuMenu extends StatelessWidget {
                 ],
               ),
             ),
+            TombolFavorit(namaMenu: nama), // <-- BARU di commit 3
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// STATEFUL: satu-satunya bagian yang datanya berubah (spesifikasi #4).
+// Dibuat sekecil mungkin: hanya satu ikon. Saat ditekan, setState hanya
+// membangun ulang tombol ini, bukan seluruh halaman.
+// ---------------------------------------------------------------------------
+class TombolFavorit extends StatefulWidget {
+  const TombolFavorit({super.key, required this.namaMenu});
+
+  final String namaMenu;
+
+  @override
+  State<TombolFavorit> createState() => _TombolFavoritState();
+}
+
+class _TombolFavoritState extends State<TombolFavorit> {
+  bool _favorit = false; // state: hidup di objek State
+
+  void _ubah() {
+    setState(() => _favorit = !_favorit);
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            _favorit
+                ? '${widget.namaMenu} ditambahkan ke favorit'
+                : '${widget.namaMenu} dihapus dari favorit',
+          ),
+        ),
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: _favorit ? 'Hapus dari favorit' : 'Tandai favorit',
+      onPressed: _ubah,
+      icon: Icon(
+        _favorit ? Icons.favorite : Icons.favorite_border,
+        color: _favorit ? Theme.of(context).colorScheme.primary : null,
       ),
     );
   }

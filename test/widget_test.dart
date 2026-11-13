@@ -1,9 +1,31 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:pm_tugas05_4242550001/main.dart';
 
 void main() {
-  testWidgets('Aplikasi menampilkan halaman menu', (tester) async {
+  testWidgets('Ikon favorit berubah setelah ditekan', (tester) async {
     await tester.pumpWidget(const MenuUmkmApp());
-    expect(find.text('Halo'), findsOneWidget);
+
+    // Awalnya semua menu belum favorit.
+    expect(
+      find.byIcon(Icons.favorite_border),
+      findsNWidgets(daftarMenu.length),
+    );
+    expect(find.byIcon(Icons.favorite), findsNothing);
+
+    // Tekan tombol favorit pada menu pertama.
+    final tombol = find.byIcon(Icons.favorite_border).first;
+    await tester.ensureVisible(tombol);
+    await tester.pumpAndSettle();
+    await tester.tap(tombol);
+    await tester.pump();
+
+    // Satu menu berubah menjadi favorit, SnackBar muncul.
+    expect(find.byIcon(Icons.favorite), findsOneWidget);
+    expect(
+      find.byIcon(Icons.favorite_border),
+      findsNWidgets(daftarMenu.length - 1),
+    );
+    expect(find.text('Birthday Cake ditambahkan ke favorit'), findsOneWidget);
   });
 }
